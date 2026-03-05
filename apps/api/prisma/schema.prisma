@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PitStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+model PitUpdate {
+  id        String    @id @default(uuid())
+  buildId   String
+  message   String
+  severity  String    @default("info")
+  createdAt DateTime  @default(now())
+  status    PitStatus @default(TODO)
+
+  archivedAt DateTime? // ✅ null = active, timestamp = archived
+
+  build     Build     @relation(fields: [buildId], references: [id], onDelete: Cascade)
+
+  @@index([buildId, createdAt])
+  @@index([buildId, status, createdAt])
+  @@index([buildId, archivedAt, createdAt]) // ✅ helps queries that hide archived
+}
+
+model Build {
+  id        String      @id @default(uuid())
+  name      String
+  createdAt DateTime    @default(now())
+  updates   PitUpdate[]
+}

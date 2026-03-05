@@ -1,0 +1,30 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "dev:socket": "tsx watch src/test-socket.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prisma": "prisma"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.28.1",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.0.10",
+    "prisma": "^5.22.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
