@@ -190,45 +190,61 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
     const inProg = updates.filter((u) => (u.status ?? "TODO") === "IN_PROGRESS");
     const done = updates.filter((u) => (u.status ?? "TODO") === "DONE");
 
-    function Column({ title, items }: { title: string; items: PitUpdate[]; }){
+    function Column({ title, items, borderClass }: { title: string; items: PitUpdate[]; borderClass: string}){
         return(
 
-            <div style={{ border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: 12, minHeight: 120, }} >
-                <div style={{ fontWeight: 700, marginBottom: 10 }}>{title}</div>
+            <div className={`border border-solid ${borderClass} rounded-xl p-3 min-h-32 bg-jdm-bg-card`} >
+                <div className="font-bold mb-2.5">{title}</div>
 
                 {items.length === 0 ? (
-                <div style={{ opacity: 0.6, fontSize: 13 }}>Nothing here yet.</div>
+                <div className="text-xs text-jdm-text-muted text-center py-6 tracking-wider uppercase" >Nothing here yet.</div>
                 ) : (
-                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                <ul className="list-none p-0 m-0">
                     {items.map((u) => (
-                    <li key={u.id} style={{ border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: 12, marginTop: 10, }} >
-                        <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
-                            <strong style={{ textTransform: "uppercase" }}>
-                                {(u.severity || "info").toUpperCase()}
+                    <li key={u.id} className="border border-white/10 rounded-xl p-3 mt-2.5 bg-jdm-bg hover:border-white/25 transition-all duration-200" >
+                        <div className="flex gap-3 items-baseline mb-2">
+                            <strong className={`text-xs font-bold uppercase tracking-wider ${
+                                u.severity === "critical" ? "text-red-400" :
+                                u.severity === "warn" ? "text-jdm-amber" :
+                                "text-jdm-blue"
+                            }`}>
+                                {u.severity.toUpperCase()}
                             </strong>
-                            <span style={{ opacity: 0.7, fontSize: 12 }}>
+                            <span className="text-xs text-jdm-text-muted">
                                 {new Date(u.createdAt).toLocaleString()}
                             </span>
                         </div>
 
-                        <p style={{ marginTop: 8, marginBottom: 10 }}>{u.message}</p>
+                        <p className="mt-2 mb-2.5" >{u.message}</p>
 
-                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <div className="flex gap-2 flex-wrap" >
                             {u.status !== "TODO" && (
-                                <button onClick={() => setUpdateStatus(u.id, "TODO")} disabled={movingId === u.id} style={{ padding: "6px 10px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.15)", background: "transparent", color: "inherit", cursor: "pointer", opacity: movingId === u.id ? 0.6 : 1, }} >
-                                Back to TODO
+                                <button 
+                                    onClick={() => setUpdateStatus(u.id, "TODO")} 
+                                    disabled={movingId === u.id}
+                                    className="px-3 py-1 rounded-lg border border-white/15 text-xs text-jdm-text-dim hover:border-red-500/50 hover:text-red-400 transition-all duration-200 disabled:opacity-40 cursor-pointer"
+                                >
+                                    ↩ TODO
                                 </button>
                             )}
 
                             {u.status !== "IN_PROGRESS" && (
-                                <button onClick={() => setUpdateStatus(u.id, "IN_PROGRESS")} disabled={movingId === u.id} style={{ padding: "6px 10px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.15)", background: "transparent", color: "inherit", cursor: "pointer", opacity: movingId === u.id ? 0.6 : 1, }} >
-                                Start
+                                <button 
+                                    onClick={() => setUpdateStatus(u.id, "IN_PROGRESS")} 
+                                    disabled={movingId === u.id}
+                                    className="px-3 py-1 rounded-lg border border-white/15 text-xs text-jdm-text-dim hover:border-jdm-blue/50 hover:text-jdm-blue transition-all duration-200 disabled:opacity-40 cursor-pointer"
+                                >
+                                    ▶ Start
                                 </button>
                             )}
 
                             {u.status !== "DONE" && (
-                                <button onClick={() => setUpdateStatus(u.id, "DONE")} disabled={movingId === u.id} style={{ padding: "6px 10px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)", color: "inherit", cursor: "pointer", opacity: movingId === u.id ? 0.6 : 1, }} >
-                                Done
+                                <button 
+                                    onClick={() => setUpdateStatus(u.id, "DONE")} 
+                                    disabled={movingId === u.id}
+                                    className="px-3 py-1 rounded-lg border border-white/15 text-xs text-jdm-text-dim hover:border-jdm-green/50 hover:text-jdm-green transition-all duration-200 disabled:opacity-40 cursor-pointer"
+                                >
+                                    ✓ Done
                                 </button>
                             )}
                         </div>
@@ -244,70 +260,49 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
 
     return(
 
-        <div style={{marginTop: 12}}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                <span style={{ padding: "6px 10px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.18)", fontSize: 12, opacity: 0.9,}}>
+        <div className="mt-3" >
+            <div className="flex items-center gap-2.5 mb-3.5" >
+                <span className="px-3 py-1.5 rounded-full border border-white/20 text-xs opacity-90" >
                     {badgeText}
                 </span>
 
                 {statusMsg ? (
-                    <span style={{ fontSize: 12, opacity: 0.6 }}>{statusMsg}</span>
+                    <span className="text-xs text-jdm-text-muted">{statusMsg}</span>
                 ) : null}
             </div>
 
-            <form onSubmit={submitUpdate} style={{ display: "grid", gap:10, marginBottom: 18 }}>
-                <div style={{ display: "grid", gap: 8}}>
-                    <label style={{ fontSize: 12, opacity: 0.75 }}>New pit update</label>
+            <form onSubmit={submitUpdate} className="grid gap-2.5 mb-4.5" >
+                <div className="grid gap-2" >
+                    <label className="text-xs opacity-[.70]" >New pit update</label>
 
-                    <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="e.g. Installed new brakes" rows={3} style={{width: "100%", padding: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.15)", background: "transparent", color: "inherit", resize: "vertical"}}/>
-                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                        <select value={severity} onChange={(e) => setSeverity(e.target.value)} style={{padding: "10px 12px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.15)", background: "transparent", color: "inherit"}}>
+                    <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="e.g. Installed new brakes" rows={3} className="w-full p-3 rounded-xl border border-white/15 bg-transparent text-inherit resize-y focus:outline-none focus:border-jdm-blue transition-colors duration-200" />
+                    <div className="flex gap-2.5 items-center" >
+                        <select value={severity} onChange={(e) => setSeverity(e.target.value)} className="px-3 py-2.5 rounded-xl border border-white/15 bg-jdm-bg-card text-jdm-text focus:outline-none focus:border-jdm-blue transition-colors duration-200" >
                             <option value="info">Info</option>
                             <option value="warn">Warn</option>
                             <option value="critical">Critical</option>
                         </select>
 
-                        <button type="submit" disabled={submitting} style={{ padding: "10px 14px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.6)", color: "inherit", cursor: submitting ? "not-allowed" : "pointer"}}>
+                        <button type="submit" disabled={submitting} className="px-4 py-2.5 rounded-xl border border-jdm-blue bg-jdm-blue text-jdm-bg font-semibold cursor-pointer hover:brightness-110 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" >
                             {submitting ? "Saving..." : "Post update"}
                         </button>
 
-                        <span style={{fontSize: 12, opacity: 0.6}}>
+                        <span className="text-xs opacity-[.6]" >
                             (socket will append instantly)
                         </span>
                     </div>
 
                     {formError ? (
-                            <div style={{ fontSize: 12, opacity: 0.8}}>
+                            <div className="text-xs opacity-[.8]" >
                                 ❗ {formError}
                             </div>
                     ): null}
                 </div>
             </form>
-
-            {/* {updates.length === 0 ? (
-                <p style={{ opacity: 0.7 }}>No updates yet.</p>
-            ) : (
-                <ul style={{ listStyle: "none", padding: 0, margin: 0}}>
-                    {updates.map((u) => (
-                        <li key={u.id} style={{ border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: 16, marginTop: 12}}>
-                            <div style={{ display: "flex", gap: 12, alignItems: "baseline"}}>
-                                <strong style={{ textTransform: "uppercase" }}>
-                                    {(u.severity || "info").toUpperCase()}
-                                </strong>
-                                <span style={{ opacity: 0.7, fontSize: 14}}>
-                                    {new Date(u.createdAt).toLocaleString()}
-                                </span>
-                            </div>
-                            <p style={{ marginTop: 8, marginBottom: 0}}>{u.message}</p>
-                        </li>
-                    ))}
-                </ul>
-            )} */}
-
-            <div style={{display: "grid", gap: 12, gridTemplateColumns: "repeat(3, minmax(0,1fr))", }} >
-                <Column title="TODO" items={todo} />
-                <Column title="IN PROGRESS" items={inProg} /> 
-                <Column title="DONE" items={done} />
+            <div className="grid grid-cols-3 gap-4 mt-4" >
+                <Column title="TODO" items={todo} borderClass="border-red-500/80" />
+                <Column title="IN PROGRESS" items={inProg} borderClass="border-jdm-blue/80" />
+                <Column title="DONE" items={done} borderClass="border-jdm-green/80" />
             </div>
 
         </div>

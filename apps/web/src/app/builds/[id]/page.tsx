@@ -47,15 +47,15 @@ export default async function BuildPage({params,}: { params: Promise<{ id: strin
 
     return(
 
-        <main style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
-            <Link href="/builds" style={{ display: "inline-block", marginBottom: 16 }}>
+        <main className="p-6 max-w-4xl m-0">
+            <Link href="/builds" className="inline-block mb-4">
                 ← Back
             </Link>
 
-            <h1 style={{ fontSize: 40, margin: 0 }}>{build.name}</h1>
-            <p style={{ opacity: 0.7, marginTop: 8}}>{build.id}</p>
+            <h1 className="text-4xl m-0 font-bold bg-gradient-to-r from-jdm-blue to-jdm-green-glow bg-clip-text text-transparent"  >{build.name}</h1>
+            <p className="opacity-[0.7] mt-2" >{build.id}</p>
 
-            <h2 style={{ marginTop: 32 }}>Pit Updates</h2>
+            <h2 className="mt-8" >Pit Updates</h2>
             <LiveUpdates buildId={build.id} initialUpdates={build.updates} />
 
         </main>
