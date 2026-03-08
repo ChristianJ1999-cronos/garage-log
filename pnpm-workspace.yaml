@@ -1,3 +1,4 @@
+# explains how both apps/api and apps/web are seperate node projects in the same repo (a monorepo)
 packages:
   - apps/*
 

@@ -99,7 +99,7 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
         socket.on("pit:update:new", (payload: PitUpdate) => {
             //add newest update to the top (also avoids duplicates)
             setUpdates((prev) => {
-                if(prev.some((u) => u.id === payload.id)) return prev; //dedupe
+                if(prev.some((u) => u.id === payload.id)) return prev; //dedupe / checks when a new task comes in via socket if it already exists preventing dupes
                 return [payload, ...prev];
             });
         });
@@ -108,7 +108,7 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
             setUpdates((prev) => prev.map((u) => (u.id === payload.id ? payload: u)));
         });
 
-        return () => {
+        return () => {   //this runs when the user navigates away disconnecting the socket
             socket.disconnect();
             socketRef.current = null;
         };

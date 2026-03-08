@@ -4,7 +4,7 @@ import { io } from "../index";
 
 export const updatesRouter = Router();
 
-updatesRouter.get("/builds/:buildId/updates", async (req, res) => {
+updatesRouter.get("/builds/:buildId/updates", async (req, res) => { //fetch all tasks for a build
     const {buildId} = req.params;
 
     const updates = await prisma.pitUpdate.findMany({
@@ -14,7 +14,7 @@ updatesRouter.get("/builds/:buildId/updates", async (req, res) => {
     res.json(updates);
 });
 
-updatesRouter.post("/builds/:buildId/updates", async (req, res) => {
+updatesRouter.post("/builds/:buildId/updates", async (req, res) => {  //creating a new tasks for the build then emits the task
     const { buildId } = req.params;
     const { message, severity } = req.body ?? {};
 
@@ -31,12 +31,12 @@ updatesRouter.post("/builds/:buildId/updates", async (req, res) => {
         },
     });
 
-    io.to(buildId).emit("pit:update:new", created);
+    io.to(buildId).emit("pit:update:new", created); //emitting the new task to everyone in that same room so UI updates real time using buildId here because its in the params
 
     res.status(201).json(created);
 });
 
-updatesRouter.patch("/updates/:updateId", async (req, res) => {
+updatesRouter.patch("/updates/:updateId", async (req, res) => { //update a tasks status then also emit
     const { updateId } = req.params;
     const { status } = req.body ?? {};
 
@@ -51,6 +51,6 @@ updatesRouter.patch("/updates/:updateId", async (req, res) => {
         // include: {build: true},
     });
 
-    io.to(updated.buildId).emit("pit:update:status", updated);
+    io.to(updated.buildId).emit("pit:update:status", updated); //emmiting update to everyone in the same builds room using updated.buildId to get the appropriate room
     res.json(updated);
 });

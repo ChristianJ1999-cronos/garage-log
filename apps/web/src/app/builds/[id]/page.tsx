@@ -41,7 +41,7 @@ async function getBuild(id: string): Promise<BuildWithUpdates> {
 }
 
 
-export default async function BuildPage({params,}: { params: Promise<{ id: string }>; }) {
+export default async function BuildPage({params,}: { params: Promise<{ id: string }>; }) { //{params,}->actual value youre receiving { params: Promise<{ id: string }>; }->what type the value is
     const { id } = await params;       // ✅ unwrap params FIRST
     const build = await getBuild(id);  // ✅ now id is real
 

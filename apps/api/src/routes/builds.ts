@@ -3,7 +3,7 @@ import {prisma} from "../db";
 
 export const buildsRouter = Router(); //mini express app holding routes
 
-buildsRouter.get("/", async (_req, res) => {
+buildsRouter.get("/", async (_req, res) => {  //fetch all builds
     const builds = await prisma.build.findMany({
         orderBy: { createdAt: "desc" },
     });
@@ -11,7 +11,7 @@ buildsRouter.get("/", async (_req, res) => {
     res.json(builds);
 });
 
-buildsRouter.post("/", async (_req, res) => {
+buildsRouter.post("/", async (_req, res) => {   //create new build
     const {name} = _req.body ?? {}; //json sent from the client
 
     if(!name || typeof name !== "string") {     //here we are validating the name
@@ -26,7 +26,7 @@ buildsRouter.post("/", async (_req, res) => {
     res.status(201).json(build);
 })
 
-buildsRouter.get("/:buildId", async (req, res) => {
+buildsRouter.get("/:buildId", async (req, res) => { //grabs a single build and all its updates
     const {buildId} = req.params;
 
     const build = await prisma.build.findUnique({
