@@ -1,5 +1,6 @@
 import Link from "next/link";
 import LiveUpdates from "./LiveUpdates";
+import Navbar from "../../components/Navbar";
 
 export type PitStatus = "TODO" | "IN_PROGRESS" | "DONE";
 
@@ -46,7 +47,8 @@ export default async function BuildPage({params,}: { params: Promise<{ id: strin
     const build = await getBuild(id);  // ✅ now id is real
 
     return(
-
+        <>
+        <Navbar />
         <main className="p-6 max-w-4xl m-0">
             <Link href="/builds" className="inline-block mb-4">
                 ← Back
@@ -59,6 +61,7 @@ export default async function BuildPage({params,}: { params: Promise<{ id: strin
             <LiveUpdates buildId={build.id} initialUpdates={build.updates} />
 
         </main>
+        </>
     );
 
 }

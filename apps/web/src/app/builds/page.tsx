@@ -1,7 +1,6 @@
-// "use client";
 
-// import { useEffect, useState } from "react";
 import Link from "next/link";
+import Navbar from "../components/Navbar";
 
 type Build = {
     id: string;
@@ -30,8 +29,10 @@ export default async function BuildsPage() {
     const builds = await getBuilds();
 
     return(
+        <>
+        <Navbar />
         <main className="min-h-screen p-8 max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-jdm-green to-jdm-blue-glow bg-clip-text text-transparent">Garage Log</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-jdm-green to-jdm-blue to-20% bg-clip-text text-transparent">Garage Log</h1>
 
             <p className="mt-2 text-zinc-100">
                 Click a build to view live pit updates. 
@@ -48,5 +49,6 @@ export default async function BuildsPage() {
                 ))}
             </ul>
         </main>
+        </>
     );
 }
