@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Build" ADD COLUMN     "make" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "model" TEXT NOT NULL DEFAULT '';

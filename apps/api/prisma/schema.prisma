@@ -33,6 +33,8 @@ model PitUpdate {
 model Build {
   id        String      @id @default(uuid())
   name      String
+  make      String      @default("")
+  model     String      @default("")
   createdAt DateTime    @default(now())
   updates   PitUpdate[]
 }

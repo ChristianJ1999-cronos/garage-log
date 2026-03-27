@@ -16,6 +16,8 @@ type PitUpdate = {
 type BuildWithUpdates = {
     id: string;
     name: string;
+    make: string;
+    model: string;
     createdAt: string;
     updates: PitUpdate[];
 };
@@ -54,7 +56,8 @@ export default async function BuildPage({params,}: { params: Promise<{ id: strin
                 ← Back
             </Link>
 
-            <h1 className="text-4xl m-0 font-bold bg-gradient-to-r from-jdm-blue to-jdm-green-glow bg-clip-text text-transparent"  >{build.name}</h1>
+            <h1 className="text-4xl m-0 font-bold bg-gradient-to-r from-jdm-blue to-jdm-green-glow bg-clip-text text-transparent"  >{build.make} {build.model}</h1>
+            <h3 className="text-2xl m-0 font-bold bg-gradient-to-r from-jdm-blue to-jdm-green-glow bg-clip-text text-transparent"  >Owner: {build.name}</h3>
             <p className="opacity-[0.7] mt-2" >{build.id}</p>
 
             <h2 className="mt-8" >Pit Updates</h2>

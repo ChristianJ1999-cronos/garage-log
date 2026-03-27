@@ -12,15 +12,23 @@ buildsRouter.get("/", async (_req, res) => {  //fetch all builds
 });
 
 buildsRouter.post("/", async (_req, res) => {   //create new build
-    const {name} = _req.body ?? {}; //json sent from the client
+    const {name, make, model} = _req.body ?? {}; //json sent from the client
 
-    if(!name || typeof name !== "string") {     //here we are validating the name
-        return res.status(400).json( {error: "name is required!" });
+    if(!make || typeof make !== "string") {     //here we are validating the name
+        return res.status(400).json( {error: "Make is required!" });
+    }
+
+    if(!model || typeof model !== "string") {     //here we are validating the name
+        return res.status(400).json( {error: "Model is required!" });
     }
 
     //creating the build object from the name
     const build = await prisma.build.create({
-        data: {name},
+        data: {
+                name: name ?? "",
+                make,
+                model,
+            },
     });
  
     res.status(201).json(build);
@@ -37,4 +45,17 @@ buildsRouter.get("/:buildId", async (req, res) => { //grabs a single build and a
     });
     if(!build) return res.status(404).json({ error: "Build not found" });
     res.json(build);
+})
+
+buildsRouter.delete("/:buildId", async (req, res) => {
+    const {buildId} = req.params;
+
+    const build = await prisma.build.findUnique({
+        where: {id: buildId}
+    });
+
+    await prisma.build.delete({
+        where: {id: buildId}
+    });
+    res.status(200).json({ message: "Build deleted"});
 })
