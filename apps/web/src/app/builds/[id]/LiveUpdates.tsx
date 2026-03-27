@@ -37,6 +37,9 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
     //tracking which update is currently being moved
     const [movingId, setMovingId] = useState<string>("");
 
+    const [confirmDeletedId, setConfirmDeletedId] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
     //keep one socket instance around (dont need to reconnect unnecessarily)
     const socketRef = useRef<Socket | null>(null);
 
@@ -108,6 +111,10 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
             setUpdates((prev) => prev.map((u) => (u.id === payload.id ? payload: u)));
         });
 
+        socket.on("pit:update:deleted", ({ id }: {id: string}) => {
+            setUpdates((prev) => prev.filter((u) => u.id !== id));
+        });
+
         return () => {   //this runs when the user navigates away disconnecting the socket
             socket.disconnect();
             socketRef.current = null;
@@ -170,6 +177,28 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
         }
     }
 
+    async function deleteUpdate(updateId: string){
+        
+        try{
+            setDeletingId(updateId);
+            const res = await fetch(`${socketUrl}/api/updates/${updateId}`, {
+                method: "DELETE",
+            });
+
+            if(!res.ok){
+                const text = await res.text().catch( () => "");
+                throw new Error(`DELETE failed (${res.status}). ${text}`);
+            }
+            setUpdates((prev) => prev.filter( (u) => u.id !== updateId));
+            setConfirmDeletedId(null);
+        }catch(e: any){
+            alert(e?.message ?? "Failed to delete update.");
+        }finally{
+            setDeletingId(null);
+        }
+        
+    }
+
 
     const badgeText = status === "connected"
         ? "Connected"
@@ -201,8 +230,35 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
                 ) : (
                 <ul className="list-none p-0 m-0">
                     {items.map((u) => (
-                    <li key={u.id} className="border border-white/10 rounded-xl p-3 mt-2.5 bg-jdm-bg hover:border-white/25 transition-all duration-200" >
-                        <div className="flex gap-3 items-baseline mb-2">
+                    <li key={u.id} className="relative border border-white/10 rounded-xl p-3 mt-2.5 bg-jdm-bg hover:border-white/25 transition-all duration-200" >
+                        <div className="absolute top-2 right-2">
+                            {confirmDeletedId === u.id ? (
+                                <div className="flex items-center gap-1">
+                                    <span className="text-xs text-red-400">Delete?</span>
+                                    <button
+                                        onClick={() => deleteUpdate(u.id)}
+                                        disabled={deletingId === u.id}
+                                        className="px-2 py-0.5 text-xs rounded border border-red-500 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-200 cursor-pointer disabled:opacity-40"
+                                    >
+                                        Yes
+                                    </button>
+                                    <button
+                                        onClick={() => setConfirmDeletedId(null)}
+                                        className="px-2 py-0.5 text-xs rounded border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-600 transition-all duration-200 cursor-pointer"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setConfirmDeletedId(u.id)}
+                                    className="mr-2 text-xs text-white/20 hover:text-red-400 transition-colors duration-200 cursor-pointer"
+                                >
+                                    Delete
+                                </button>
+                            )}
+                        </div>
+                        <div className="flex gap-3 items-baseline mb-2 mt-6">
                             <strong className={`text-xs font-bold uppercase tracking-wider ${
                                 u.severity === "critical" ? "text-red-400" :
                                 u.severity === "warn" ? "text-jdm-amber" :

@@ -54,3 +54,19 @@ updatesRouter.patch("/updates/:updateId", async (req, res) => { //update a tasks
     io.to(updated.buildId).emit("pit:update:status", updated); //emmiting update to everyone in the same builds room using updated.buildId to get the appropriate room
     res.json(updated);
 });
+
+updatesRouter.delete("/updates/:updateId", async (req, res) => {
+    const {updateId} = req.params;
+
+    const update = await prisma.pitUpdate.findUnique({
+        where: {id: updateId}
+    });
+
+    if (!update) return res.status(404).json({ error: "Update not found" });
+
+    await prisma.pitUpdate.delete({
+        where: {id: updateId}
+    });
+    io.to(update.buildId).emit("pit:update:deleted", { id: updateId });
+    res.status(200).json({ message: "Update deleted"});
+});
