@@ -11,6 +11,7 @@ export type PitUpdate = {
     severity: string;
     createdAt: string;
     status: PitStatus;
+    archivedAt: string | null;
 };
 
 type Props = {
@@ -121,6 +122,10 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
         };
     }, [buildId, socketUrl]);
 
+
+
+    
+
     //subnmit handler: POST to the API
     // do NOT optimistic update, BC the socket event will add it instantly.
     async function submitUpdate(e: React.FormEvent){
@@ -218,6 +223,10 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
     const todo = updates.filter((u) => (u.status ?? "TODO") === "TODO");
     const inProg = updates.filter((u) => (u.status ?? "TODO") === "IN_PROGRESS");
     const done = updates.filter((u) => (u.status ?? "TODO") === "DONE");
+
+    const totalTasks = updates.length;
+    const doneTasks = done.length;
+    const progressPercent = totalTasks === 0 ? 0 : Math.round( ((doneTasks + inProg.length * 0.5) / totalTasks) * 100 );
 
     function Column({ title, items, borderClass }: { title: string; items: PitUpdate[]; borderClass: string}){
         return(
@@ -355,6 +364,17 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
                     ): null}
                 </div>
             </form>
+
+            <div className="mb-4">
+                <div className="flex justify-between text-xs text-jdm-text-muted mb-1">
+                    <span>Progress</span>
+                    <span>{doneTasks} / {totalTasks} done</span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-white/10">
+                    <div className="h-2 rounded-full bg-gradient-to-r from-jdm-blue to-jdm-green transition-all duration-1000" style={{ width: `${progressPercent}%` }} />
+                </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-4 mt-4" >
                 <Column title="TODO" items={todo} borderClass="border-red-500/80" />
                 <Column title="IN PROGRESS" items={inProg} borderClass="border-jdm-blue/80" />

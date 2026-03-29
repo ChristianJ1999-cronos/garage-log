@@ -62,7 +62,7 @@ updatesRouter.delete("/updates/:updateId", async (req, res) => {
         where: {id: updateId}
     });
 
-    if (!update) return res.status(404).json({ error: "Update not found" });
+    if (!update) return res.status(404).json({ error: "not found" });
 
     await prisma.pitUpdate.delete({
         where: {id: updateId}
@@ -70,3 +70,21 @@ updatesRouter.delete("/updates/:updateId", async (req, res) => {
     io.to(update.buildId).emit("pit:update:deleted", { id: updateId });
     res.status(200).json({ message: "Update deleted"});
 });
+
+updatesRouter.patch("/updates/:updateId/archived", async(req, res) => {
+    const {updateId} = req.params;
+
+    const update = await prisma.pitUpdate.findUnique({
+        where: {id: updateId}
+    });
+
+    if(!update) return res.status(404).json({ error: "Task not found."})
+
+    const archived = await prisma.pitUpdate.update({
+        where: {id: updateId},
+        data: { archivedAt: new Date()}
+    });
+
+    io.to(archived.buildId).emit("pit:update:archived", archived);
+    res.json(archived);
+})
