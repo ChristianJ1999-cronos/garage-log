@@ -40,6 +40,7 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
 
     const [confirmDeletedId, setConfirmDeletedId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [showArchived, setShowArchived] = useState(false);
 
     //keep one socket instance around (dont need to reconnect unnecessarily)
     const socketRef = useRef<Socket | null>(null);
@@ -109,6 +110,14 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
         });
 
         socket.on("pit:update:status", (payload: PitUpdate) => {
+            setUpdates((prev) => prev.map((u) => (u.id === payload.id ? payload: u)));
+        });
+
+        socket.on("pit:update:archived", (payload: PitUpdate) => {
+            setUpdates((prev) => prev.map((u) => (u.id === payload.id ? payload: u)));
+        })
+
+        socket.on("pit:update:unarchived", (payload: PitUpdate) => {
             setUpdates((prev) => prev.map((u) => (u.id === payload.id ? payload: u)));
         });
 
@@ -204,6 +213,36 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
         
     }
 
+    async function archiveUpdate(updateId: string){
+        try{
+            const res = await fetch(`${socketUrl}/api/updates/${updateId}/archived`, {
+                method: "PATCH",
+            });
+            
+            if(!res.ok){
+                const text = await res.text().catch( () => "");
+                throw new Error(`Archiving task failed (${res.status}). ${text}`);
+            }
+        }catch (e: any){
+            alert( e?.message ?? "Failed to archive task.");
+        }
+    }
+
+    async function unarchiveUpdate(updateId: string){
+        try{
+            const res = await fetch(`${socketUrl}/api/updates/${updateId}/unarchived`, {
+                method: "PATCH"
+            });
+
+            if(!res.ok){
+                const text = await res.text().catch( () => "");
+                throw new Error(`Unarchiving task failed (${res.status}). ${text} `);
+            }
+        }catch(e: any){
+            alert( e?.message ?? "Failed to unarchived task.");
+        }
+    }
+
 
     const badgeText = status === "connected"
         ? "Connected"
@@ -220,11 +259,12 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
     //     return <p>No updates yet.</p>
     // }
 
-    const todo = updates.filter((u) => (u.status ?? "TODO") === "TODO");
-    const inProg = updates.filter((u) => (u.status ?? "TODO") === "IN_PROGRESS");
-    const done = updates.filter((u) => (u.status ?? "TODO") === "DONE");
+    const archived = updates.filter((u) => u.archivedAt !== null);
+    const todo = updates.filter((u) => !u.archivedAt && (u.status ?? "TODO") === "TODO");
+    const inProg = updates.filter((u) => !u.archivedAt && (u.status ?? "TODO") === "IN_PROGRESS");
+    const done = updates.filter((u) => !u.archivedAt && (u.status ?? "TODO") === "DONE");
 
-    const totalTasks = updates.length;
+    const totalTasks = updates.filter((u) => !u.archivedAt).length;
     const doneTasks = done.length;
     const progressPercent = totalTasks === 0 ? 0 : Math.round( ((doneTasks + inProg.length * 0.5) / totalTasks) * 100 );
 
@@ -270,7 +310,11 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
                         <div className="flex gap-3 items-baseline mb-2 mt-6">
                             <strong className={`text-xs font-bold uppercase tracking-wider ${
                                 u.severity === "critical" ? "text-red-400" :
-                                u.severity === "warn" ? "text-jdm-amber" :
+                                u.severity === "urgent" ? "text-orange-400" :
+                                u.severity === "warning" ? "text-jdm-amber" :
+                                u.severity === "parts" ? "text-purple-400" :
+                                u.severity === "tune" ? "text-lime-400" :
+                                u.severity === "inspection" ? "text-sky-400" :
                                 "text-jdm-blue"
                             }`}>
                                 {u.severity.toUpperCase()}
@@ -312,6 +356,15 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
                                     ✓ Done
                                 </button>
                             )}
+
+                            {u.status === "DONE" && !u.archivedAt && (
+                                <button 
+                                    onClick={() => archiveUpdate(u.id)} 
+                                    className="px-3 py-1 rounded-lg border border-white/15 text-xs text-jdm-text-dim hover:border-jdm-green/50 hover:text-jdm-green transition-all duration-200 disabled:opacity-40 cursor-pointer"
+                                >
+                                    ↓ Archive
+                                </button>
+                            )}
                         </div>
                     </li>
                     ))}
@@ -344,7 +397,11 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
                     <div className="flex gap-2.5 items-center" >
                         <select value={severity} onChange={(e) => setSeverity(e.target.value)} className="px-3 py-2.5 rounded-xl border border-white/15 bg-jdm-bg-card text-jdm-text focus:outline-none focus:border-jdm-blue transition-colors duration-200" >
                             <option value="info">Info</option>
-                            <option value="warn">Warn</option>
+                            <option value="warning">Warning</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="parts">Parts</option>
+                            <option value="tune">Tune</option>
+                            <option value="inspection">Inspection</option>
                             <option value="critical">Critical</option>
                         </select>
 
@@ -365,6 +422,12 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
                 </div>
             </form>
 
+            <div className="flex gap-4 mb-2 text-2xl font-semibold">
+                <span className="text-red-400">TODO: {todo.length}</span>
+                <span className="text-jdm-blue">IN PROGRESS: {inProg.length}</span>
+                <span className="text-jdm-green">DONE: {done.length}</span>
+            </div>
+
             <div className="mb-4">
                 <div className="flex justify-between text-xs text-jdm-text-muted mb-1">
                     <span>Progress</span>
@@ -381,6 +444,75 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
                 <Column title="DONE" items={done} borderClass="border-jdm-green/80" />
             </div>
 
+            {archived.length > 0 && (
+                <div className="mt-6">
+                    <button onClick={ () => setShowArchived((prev) => !prev)} className="flex items-center gap-2 text-sm text-jdm-text-muted w-full rounded-lg border border-solid border-jdm-blue-glow mb-2 hover:text-white hover:bg-jdm-blue hover:rounded-lg transition-colors duration-200 cursor-pointer p-3 hover:p-3">
+                        <span>{showArchived ? "" : ""}</span>
+                        <span>Archived ({archived.length})</span>
+                    </button>
+
+                    {showArchived && (
+                        <ul className="list-none p-0 m-0 border border-white/10 rounded-xl p-3 bg-jdm-bg-card">
+                            {archived.map( (u) => (
+                                <li key={u.id} className="border border-white/10 rounded-xl p-3 mt-2.5 bg-jdm-bg opacity-60">
+                                    <div className="flex gap-3 items-baseline mb-2">
+                                        <strong className={`text-xs font-bold uppercase tracking-wider ${
+                                            u.severity === "critical" ? "text-red-400" :
+                                            u.severity === "urgent" ? "text-orange-400" :
+                                            u.severity === "warning" ? "text-jdm-amber" :
+                                            u.severity === "parts" ? "text-purple-400" :
+                                            u.severity === "tune" ? "text-lime-400" :
+                                            u.severity === "inspection" ? "text-sky-400" :
+                                            "text-jdm-blue"
+                                        }`}>
+                                            {u.severity.toUpperCase()}
+                                        </strong>
+                                        <span className="text-xs text-jdm-text-muted">
+                                            Archived {new Date(u.archivedAt!).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center mt-2">
+                                        <p className="mt-2 mb-0">{u.message}</p>
+                                        <div className="flex items-center gap-2">
+                                            <button 
+                                                onClick={() => unarchiveUpdate(u.id)} 
+                                                className="px-3 py-2 rounded-lg border border-white/15 text-xs text-jdm-text-dim hover:border-jdm-green/50 hover:text-jdm-green transition-all duration-200 cursor-pointer"
+                                            >
+                                                + Unarchive
+                                            </button>
+                                            {confirmDeletedId === u.id ? (
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-xs text-red-400">Delete?</span>
+                                                    <button
+                                                        onClick={() => deleteUpdate(u.id)}
+                                                        disabled={deletingId === u.id}
+                                                        className="px-2 py-0.5 text-xs rounded border border-red-500 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-200 cursor-pointer disabled:opacity-40"
+                                                    >
+                                                        Yes
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setConfirmDeletedId(null)}
+                                                        className="px-2 py-0.5 text-xs rounded border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-600 transition-all duration-200 cursor-pointer"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    onClick={() => setConfirmDeletedId(u.id)}
+                                                    className="mr-2 text-xs text-red-200 rounded border border-red-500 p-2 transition-colors duration-200 cursor-pointer bg-red-500/40 hover:text-white hover:bg-red-600"
+                                                >
+                                                    Delete
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

@@ -6,6 +6,7 @@ export const buildsRouter = Router(); //mini express app holding routes
 buildsRouter.get("/", async (_req, res) => {  //fetch all builds
     const builds = await prisma.build.findMany({
         orderBy: { createdAt: "desc" },
+        include: { _count: {select: { updates: true}}, updates: {select: {status: true, archivedAt: true}}}
     });
 
     res.json(builds);

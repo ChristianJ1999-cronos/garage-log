@@ -11,6 +11,7 @@ type PitUpdate = {
     severity: string;
     createdAt: string;
     status: PitStatus;
+    archivedAt: string | null;
 };
 
 type BuildWithUpdates = {
@@ -21,6 +22,15 @@ type BuildWithUpdates = {
     createdAt: string;
     updates: PitUpdate[];
 };
+
+type Build = {
+  id: string;
+  name: string;
+  make: string;
+  model: string;
+  createdAt: string;
+  updates: { status: string; archivedAt: string | null}[];
+}
 
 async function getBuild(id: string): Promise<BuildWithUpdates> {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -51,16 +61,16 @@ export default async function BuildPage({params,}: { params: Promise<{ id: strin
     return(
         <>
         <Navbar />
-        <main className="p-6 max-w-4xl m-0">
+        <main className="p-6 w-full m-0">
             <Link href="/builds" className="inline-block mb-4">
                 ← Back
             </Link>
 
             <h1 className="text-4xl m-0 font-bold bg-gradient-to-r from-jdm-blue to-jdm-green-glow bg-clip-text text-transparent"  >{build.make} {build.model}</h1>
             <h3 className="text-2xl m-0 font-bold bg-gradient-to-r from-jdm-blue to-jdm-green-glow bg-clip-text text-transparent"  >Owner: {build.name}</h3>
-            <p className="opacity-[0.7] mt-2" >{build.id}</p>
+            {/* <p className="opacity-[0.7] mt-2" >{build.id}</p> */}
 
-            <h2 className="mt-8" >Pit Updates</h2>
+            <h2 className="mt-5" >Pit Updates</h2>
             <LiveUpdates buildId={build.id} initialUpdates={build.updates} />
 
         </main>
