@@ -81,24 +81,24 @@ export default function NewBuild(){
 
         <>
             <Navbar />
-            <div className="h-screen place-items-center-safe content-center-safe">
-                <form onSubmit={submitBuild} className="gap-2.5 mb-20.5 w-2xl border border-solid border-jdm-blue-glow rounded p-4" >
+            <div className="min-h-screen flex items-center justify-center px-4 py-10">
+                <form onSubmit={submitBuild} className="gap-2.5 mb-20.5 w-full max-w-2xl border border-solid border-jdm-blue-glow rounded p-4" >
                     <h1 className="mb-4.5 font-bold ">Submit new car build</h1>
-                    <div>
-                        <select className={`pl-2 pr-4 mr-4 border border-solid border-jdm-green-glow ${selectedMake ? "bg-jdm-blue" : "bg-jdm-blue-glow/80"} text-white rounded-xl focus:bg-jdm-blue`} id="vehicleBrand" value={selectedMake} onChange={(m) => setSelectedMake(m.target.value)}>
+                    <div className="flex flex-col gap-3">
+                        <select className={` w-full pl-2 pr-4 mr-4 border border-solid border-jdm-green-glow ${selectedMake ? "bg-jdm-blue" : "bg-jdm-blue-glow/80"} text-white rounded-xl focus:bg-jdm-blue`} id="vehicleBrand" value={selectedMake} onChange={(m) => setSelectedMake(m.target.value)}>
                             <option value="" disabled>Select a make</option>
                             {makes.map((make) => (
                                 <option key={make} value={make} >{make}</option>
                             ))}
                         </select>
                         {models.length > 0 && (
-                            <select className={`pl-2 pr-4 mr-4 border border-solid border-jdm-green-glow ${selectedModel ? "bg-jdm-blue" : "bg-jdm-blue-glow/80"} text-white rounded-xl focus:bg-jdm-blue selection:bg-jdm-blue`} id="vehicleModel" value={selectedModel} onChange={(m) => setSelectedModel(m.target.value)}>
+                            <select className={`w-full pl-2 pr-4 mr-4 border border-solid border-jdm-green-glow ${selectedModel ? "bg-jdm-blue" : "bg-jdm-blue-glow/80"} text-white rounded-xl focus:bg-jdm-blue selection:bg-jdm-blue`} id="vehicleModel" value={selectedModel} onChange={(m) => setSelectedModel(m.target.value)}>
                                 {models.map((model) => (
                                     <option key={model} value={model} >{model}</option>
                                 ))}
                             </select>
                         )}
-                        <br/><input className="w-[80%] mt-10 border border-solid border-jdm-blue-glow rounded-sm" value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="Name of owner EX: John Doe..."></input>
+                        <br/><input className="w-full px-3 py-2 border border-solid border-jdm-blue-glow rounded-xl bg-transparent text-white placeholder-white/40" value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="Name of owner EX: John Doe..."></input>
                     </div>
                     <br/>
                     {formError && (
@@ -106,7 +106,7 @@ export default function NewBuild(){
                             ⚠️ {formError}
                         </div>
                     )}
-                    <div className="flex justify-end mr-10 mb-2">
+                    <div className="flex justify-center sm:justify-end mt-4 mb-2">
                         <button type="submit" className="mt-8 px-4 py-2.5 rounded-xl border border-jdm-blue bg-jdm-blue/60 text-white font-semibold cursor-pointer hover:brightness-100 hover:text-black transition-all duration-200 hover:scale-[1.05] hover:bg-jdm-blue/80 disabled:opacity-50 disabled:cursor-not-allowed " >Create Build</button>
                     </div>
                 </form>

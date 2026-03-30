@@ -422,7 +422,7 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
                 </div>
             </form>
 
-            <div className="flex gap-4 mb-2 text-2xl font-semibold">
+            <div className="flex gap-4 mb-2 text-sm sm:text-2xl font-semibold">
                 <span className="text-red-400">TODO: {todo.length}</span>
                 <span className="text-jdm-blue">IN PROGRESS: {inProg.length}</span>
                 <span className="text-jdm-green">DONE: {done.length}</span>
@@ -438,7 +438,7 @@ export default function LiveUpdates({buildId, initialUpdates}: Props){
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mt-4" >
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4" >
                 <Column title="TODO" items={todo} borderClass="border-red-500/80" />
                 <Column title="IN PROGRESS" items={inProg} borderClass="border-jdm-blue/80" />
                 <Column title="DONE" items={done} borderClass="border-jdm-green/80" />

@@ -11,23 +11,6 @@ type Build = {
     createdAt: string;
 };
 
-// async function getBuilds(): Promise<Build[]> {
-//     const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-//     if(!baseUrl){
-//         throw new Error("NEXT_PUBLIC_API_URL is not set");
-//     }
-
-//     const res = await fetch(`${baseUrl}/api/builds`, {
-//         //prevent Next from caching during dev so you always see latest
-//         cache: "no-store",
-//     });
-
-//     if(!res.ok){
-//         throw new Error(`Failed to fetch builds: ${res.status}`);
-//     }
-//     return res.json();
-// }
-
 export default function BuildsPage() { 
     const [builds, setBuilds] = useState<Build[]>([]);
     const [confirmDeletedId, setConfirmDeletedId] = useState<string | null>(null);
@@ -77,7 +60,7 @@ export default function BuildsPage() {
                             }
 
                             {
-                                <div className="px-4 flex items-center gap-2">
+                                <div className="px-4 flex flex-col items-end gap-1 py-2">
                                     {confirmDeletedId === b.id ? (
                                         <>
                                             <span className="text-sm text-red-400">Delete?</span>
