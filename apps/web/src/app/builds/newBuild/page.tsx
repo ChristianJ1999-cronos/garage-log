@@ -36,7 +36,7 @@ export default function NewBuild(){
                 const data = await apiModels.json();
                 const modelNames = data.Results.map( (m: {Model_Name: string}) => m.Model_Name );
                 setModel(modelNames);
-                setSelectedModel("");
+                setSelectedModel(modelNames[0] ?? "");
             }catch(error){
                 return null;
             }
