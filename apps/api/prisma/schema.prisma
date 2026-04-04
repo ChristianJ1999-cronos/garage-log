@@ -37,4 +37,6 @@ model Build {
   model     String      @default("")
   createdAt DateTime    @default(now())
   updates   PitUpdate[]
+
+  @@unique([make, model, name])
 }

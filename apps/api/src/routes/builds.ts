@@ -1,5 +1,6 @@
 import {Router} from "express";
 import {prisma} from "../db";
+import {Prisma} from "@prisma/client";
 
 export const buildsRouter = Router(); //mini express app holding routes
 
@@ -35,16 +36,25 @@ buildsRouter.post("/", async (_req, res) => {   //create new build
         return res.status(409).json({error: "A build with this make ,model, and owner already exists."});
     }
 
-    //creating the build object from the name
-    const build = await prisma.build.create({
-        data: {
-                name: name ?? "",
-                make,
-                model,
-            },
-    });
- 
-    res.status(201).json(build);
+    try{
+        //creating the build object from the name
+        const build = await prisma.build.create({
+            data: {
+                    name: name ?? "",
+                    make,
+                    model,
+                },
+        });
+        res.status(201).json(build);
+    }catch(error){
+        if(error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002"){
+            return res.status(409).json({
+                error: "A build with this make, model, and owner already exists. Please create a different build.",
+            });
+        }
+        return res.status(500).json({ error: "Something went wrong."});
+    }
+
 });
 
 buildsRouter.get("/:buildId", async (req, res) => { //grabs a single build and all its updates
